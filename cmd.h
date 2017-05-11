@@ -15,6 +15,7 @@
 #include <pthread.h>
 #include <assert.h>
 
+#include "main.h" 
 
 #define PORT2 9015
 #define PORT1 5556 
@@ -31,6 +32,7 @@ void die(char *s)
 typedef struct {
 	struct sockaddr_in si_other;
 	int sock;
+	drone_com shared;
 }th_arg;
 
 
@@ -137,7 +139,7 @@ void *cmd_thread_func(void *arg)
 
 		printf("Envio: %s\n",buffer);
 
-	if (sendto(targ->sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
+	if (sendto(targ->shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
         die("sendto()");
     }
     else
