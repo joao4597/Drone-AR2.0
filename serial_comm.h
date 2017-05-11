@@ -8,6 +8,7 @@
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <sys/ioctl.h>
 #include <getopt.h>
+#include <sched.h>
 
 
 
@@ -28,7 +29,7 @@ extern distance struct_distances;
 	_define port name
 	_define baudrate
 */
-#define PORT_NAME "/dev/ttyACM0"
+#define PORT_NAME "/dev/ttyUSB0"
 #define BAUD B9600
 
 

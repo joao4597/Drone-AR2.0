@@ -1,0 +1,1 @@
+int obstacle_avoid();

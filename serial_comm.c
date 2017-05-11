@@ -1,6 +1,6 @@
 #include "serial_comm.h"
 
-#define READ_USLEEP 1000
+#define READ_USLEEP 100
 
 int fd;
 distance struct_distances;
@@ -94,14 +94,14 @@ int serialport_read(){
                 }
             }
             //Read distance Back sensor
-            for(i = 0; 1; i++){
+            /*for(i = 0; 1; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
                     struct_distances.back = (float)atof(buffer);
                     break;
                 }
-            }
+            }*/
             //Read distane left sensor
             for(i = 0; 1; i++){
                 buffer[i] = serialport_read_char();
@@ -122,8 +122,9 @@ int serialport_read(){
             }
 
             printf("front-> %f\nback-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.back, struct_distances.left, struct_distances.right);
+            break;
         }
-    }while(c != 'Z');
+    }while(1);
     
     return 0;
 }
