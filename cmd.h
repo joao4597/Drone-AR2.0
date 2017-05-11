@@ -133,10 +133,13 @@ void *cmd_thread_func(void *arg)
 		
 		
 		strtok_r (buf, "=", &buf_send1);
-		snprintf(buffer, 1024, "%s=%u%s\r",buf,seq,buf_send1);
-		pthread_mutex_lock(&(targ->shared.lock));
+		
+
+		pthread_mutex_lock(targ->shared.lock);
+		snprintf(buffer, 1024, "%s=%u%s\r",buf,*(targ->shared.seq),buf_send1);
 		(*(targ->shared.seq))++;
-		pthread_mutex_unlock(&(targ->shard.lock));
+		pthread_mutex_unlock(targ->shared.lock);
+		
 		printf("Envio: %s\n",buffer);
 
 	if (sendto(targ->shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
