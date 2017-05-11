@@ -56,7 +56,6 @@ int serialport_init(){
     do{
         n = read(fd, &c, 1);
     	if(n == 0) {
-            usleep(READ_USLEEP);
             break;
         }else if(n == -1){
         	break;

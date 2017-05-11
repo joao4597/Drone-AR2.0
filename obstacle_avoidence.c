@@ -37,14 +37,10 @@ void obstacle_avoid(){
 		serialport_read();
 		printf("front-> %f\nback-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.back, struct_distances.left, struct_distances.right);
 		if(struct_distances.front < D_LOW_LIMIT || struct_distances.left < D_LOW_LIMIT || struct_distances.right < D_LOW_LIMIT){
-			
 
-			
-			//printf("AVOID!!\n");
-			
 
 			while(struct_distances.front < D_HIGH_LIMIT || struct_distances.left < D_HIGH_LIMIT || struct_distances.right < D_HIGH_LIMIT){
-				//snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)), 0, 0);
+
 				if(struct_distances.front < D_HIGH_LIMIT)
 					ajustment_front = -((struct_distances.front * slop) + 1);
 				else
@@ -55,7 +51,8 @@ void obstacle_avoid(){
 					
 					ajustment_left = (struct_distances.left * slop) + 1;
 					printf("move front->%f\nmoveright%f\n\n\n", ajustment_front, ajustment_left);
-					/*if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
+					/*snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)), 0, 0);
+					if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
 						die("sendto()");
 					}
 					else
@@ -63,10 +60,11 @@ void obstacle_avoid(){
 
 				//SEND THIS STRING IF THERE IS AN OBJECT ON THE RIGHT SIDE
 				}else if(struct_distances.right < D_HIGH_LIMIT){
-					ajustment_front = (struct_distances.front * slop) + 1;
+
 					ajustment_right = -((struct_distances.right * slop) + 1);
 					printf("move front->%f\nmoveleft%f\n\n\n", ajustment_front, ajustment_right);
-					/*if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
+					/*snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)), 0, 0);
+					if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
 						die("sendto()");
 					}
 					else
@@ -84,4 +82,5 @@ void obstacle_avoid(){
 		}
 	}
 
+	usleep(1000);
 }
