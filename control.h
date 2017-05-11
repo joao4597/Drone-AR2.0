@@ -127,9 +127,9 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 	{
 		switch (nr)
 		{
-			case 14: snprintf(buff, 1024, "AT*REF=%u,290718208\r", *seq);
+			case 14: snprintf(buff, 1024, "AT*REF=,290718208\r" );
 			break;
-			case 13: snprintf(buff, 1024, "AT*REF=%u,290717696\r", *seq);
+			case 13: snprintf(buff, 1024, "AT*REF=,290717696\r" );
 			break;
 		
 			//printf()
@@ -138,13 +138,13 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 	else if(type==2)
 	{
 		if(search==0)
-			snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(analog[1].y)),*(int*)(&(analog[1].x)));
+			snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(analog[1].y)),*(int*)(&(analog[1].x)));
 		else 
 		{
 			pthread_mutex_lock(&lock);
 			printf("Desviox: %lf\nDesvioy: %lf\n",v[0],v[1]);
 			printf("Aquiii*****************************************\n");
-			snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(v[1])),*(int*)(&(v[0])));
+			snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(v[1])),*(int*)(&(v[0])));
 			pthread_mutex_unlock(&lock);
 		}
 		

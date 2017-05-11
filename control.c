@@ -123,6 +123,8 @@ analog[1].x=0;
 analog[1].y=0;
 struct js_event ev;
 
+
+
 ret=abre(&fd);
 seq=1;
 if(ret==0)
@@ -130,7 +132,7 @@ return 0;
 
 
 
-ret=open_connection(&sock,&si_other,PORT1);
+ret=open_connection(&sock,&si_other,PORT2);
 
 
 if(ret==0)
