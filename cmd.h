@@ -116,7 +116,7 @@ void *cmd_thread_func(void *arg)
 	char buf[MAX_SIZE];
 	char buffer[MAX_SIZE];
 	char *buf_send1;
-	int seq=0;
+	//int seq=0;
 
 	//int estado=0;
 
@@ -134,9 +134,9 @@ void *cmd_thread_func(void *arg)
 		
 		strtok_r (buf, "=", &buf_send1);
 		snprintf(buffer, 1024, "%s=%u%s\r",buf,seq,buf_send1);
-	
-		seq++;
-
+		pthread_mutex_lock(&(targ->shared.lock));
+		(*(targ->shared.seq))++;
+		pthread_mutex_unlock(&(targ->shard.lock));
 		printf("Envio: %s\n",buffer);
 
 	if (sendto(targ->shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){

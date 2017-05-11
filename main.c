@@ -11,9 +11,9 @@ pthread_t obstacle_thread;
 int main(){
 	int n;
 	pthread_t cmd_thread;
-	int seq;
+	int seq=0;
 	drone_com obstacle;
-	pthread_mutex_t lock;
+	pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
 	//int sock;
 	th_arg targ;
 	//int slen=sizeof(si_other);
