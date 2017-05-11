@@ -121,7 +121,7 @@ int serialport_read(){
                 }
             }
 
-            printf("front-> %f\nback-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.back, struct_distances.left, struct_distances.right);
+            //printf("front-> %f\nback-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.back, struct_distances.left, struct_distances.right);
             break;
         }
     }while(1);
