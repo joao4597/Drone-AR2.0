@@ -75,8 +75,8 @@ int serialport_read(){
     do{ 
         n = read(fd, &c, 1);
         if(n == -1){
-            printf("ERROR READING FROM SERIALPORT\n");
-            return -1;
+            perror("ERROR READING FROM SERIALPORT\n");
+            //return -1;
         }
         if(n == 0) {
             usleep(READ_USLEEP);
@@ -133,10 +133,10 @@ char serialport_read_char(){
     int n = 0;
     
     do{ 
-        n = read(fd, &c, 1);
+        n = read(fd, &c, sizeof(char)*1);
         if(n == -1){
-            printf("ERROR READING FROM SERIALPORT\n");
-            exit(0);
+            perror("ERROR READING FROM SERIALPORT\n");
+            //exit(0);
         }
         if(n == 0) {
             usleep(READ_USLEEP);

@@ -5,4 +5,6 @@
 #define SPEED_AT_DIS_HIGH 0.2
 #define B 1
 
-void obstacle_avoid();
+#include "cmd.h"
+
+void obstacle_avoid(void *obstacle);

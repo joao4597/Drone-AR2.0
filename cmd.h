@@ -31,7 +31,6 @@ void die(char *s)
 
 typedef struct {
 	struct sockaddr_in si_other;
-	int sock;
 	drone_com shared;
 }th_arg;
 

@@ -2,18 +2,22 @@
 #include "obstacle_avoidence.h"
 #include <sys/types.h>
 #include <sys/syscall.h>
+#include <assert.h>
+//#include "cmd.h"
 
 distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
-void obstacle_avoid(){
+void obstacle_avoid(void *obstacle){
 
 	int i;
+	char buff[1024];
 	float ajustment_right, ajustment_left, ajustment_front;
-	
+	assert(sizeof(int)==sizeof(float));
 	//SET THREAD PRIORITY
 	struct sched_param sched_param_obstacle;
 	sched_param_obstacle.sched_priority = 50;
+	th_arg *targ = obstacle;
 
 
 	//OPEN USB0
@@ -51,36 +55,55 @@ void obstacle_avoid(){
 					
 					ajustment_left = (struct_distances.left * slop) + 1;
 					printf("move front->%f\nmoveright%f\n\n\n", ajustment_front, ajustment_left);
-					/*snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)), 0, 0);
-					if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
+					pthread_mutex_lock(targ->shared.lock);
+					snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*(targ->shared.seq),*(int*)(&(ajustment_left)),*(int*)(&(ajustment_front)), 0, 0);
+					(*(targ->shared.seq))++;
+					pthread_mutex_unlock(targ->shared.lock);
+
+
+					if (sendto(targ->shared.sock, buff, strlen(buff) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(targ->si_other))==-1){
 						die("sendto()");
 					}
 					else
-						printf("enviado\n");*/
+						printf("enviado\n");
+
+					//(*(targ->shared.seq))++;
 
 				//SEND THIS STRING IF THERE IS AN OBJECT ON THE RIGHT SIDE
 				}else if(struct_distances.right < D_HIGH_LIMIT){
 
 					ajustment_right = -((struct_distances.right * slop) + 1);
 					printf("move front->%f\nmoveleft%f\n\n\n", ajustment_front, ajustment_right);
-					/*snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*seq,*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)), 0, 0);
-					if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
+					pthread_mutex_lock(targ->shared.lock);
+					
+					snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*(targ->shared.seq),*(int*)(&(ajustment_right)),*(int*)(&(ajustment_front)), 0, 0);
+					(*(targ->shared.seq))++;
+					
+					pthread_mutex_unlock(targ->shared.lock);
+
+					if (sendto(targ->shared.sock, buff, strlen(buff) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(targ->si_other))==-1){
 						die("sendto()");
 					}
 					else
-						printf("enviado\n");*/
+						printf("enviado\n");
+
 				}
 				serialport_read();
+				usleep(1000);
 			}
-
-			/*snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",0 , 0, 0, 0, 0);
-			if (sendto(sock,buff, strlen(buff) , 0 , (struct sockaddr *) &si_other, sizeof(si_other))==-1){
+			pthread_mutex_lock(targ->shared.lock);
+			snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*(targ->shared.seq) , 0, 0, 0, 0);
+			(*(targ->shared.seq))++;
+			pthread_mutex_unlock(targ->shared.lock);
+			if (sendto(targ->shared.sock, buff, strlen(buff) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
 				die("sendto()");
 			}
 			else
-				printf("enviado\n");*/
+				printf("enviado\n");
+			
 		}
-	}
 
-	usleep(1000);
+		usleep(1000);
+
+	}
 }
