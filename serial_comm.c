@@ -84,7 +84,7 @@ int serialport_read(){
         }else if(c == 'S'){
 
             //Read distance front sensor
-            for(i = 0; 1; i++){
+            for(i = 0; i<1; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
@@ -102,7 +102,7 @@ int serialport_read(){
                 }
             }*/
             //Read distane left sensor
-            for(i = 0; 1; i++){
+            for(i = 0; i<1; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
@@ -111,7 +111,7 @@ int serialport_read(){
                 }
             }
             //Read distance right sensor
-            for(i = 0; 1; i++){
+            for(i = 0; i<1; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
