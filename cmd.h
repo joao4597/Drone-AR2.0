@@ -151,7 +151,7 @@ void *cmd_thread_func(void *arg)
         pthread_mutex_lock(targ->lock_pvt);
         x=-1.0*val[0]/800;
         y=val[1]/800;
-        printf("Valx: %f\nValy: %f\n",x,y);
+       // printf("Valx: %f\nValy: %f\n",x,y);
         xd=*((int*)(&x));
         xy=*((int*)(&y));
 
@@ -168,7 +168,7 @@ void *cmd_thread_func(void *arg)
         if(buf[0]=='E')
         {
             pthread_mutex_lock(targ->lock_pvt);
-            printf("Valx: %f\nValy: %f\n",val[0],val[1]);
+        //    printf("Valx: %f\nValy: %f\n",val[0],val[1]);
             
          //   sleep(1);
             pthread_mutex_unlock(targ->lock_pvt);
@@ -208,7 +208,7 @@ void *cmd_thread_func(void *arg)
     		
             (*(targ->shared.seq))++;
     		pthread_mutex_unlock(targ->shared.lock);
-    		printf("Envio: %s\n",buffer);
+    	//	printf("Envio: %s\n",buffer);
         }
 /*	if (sendto(targ->shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
         die("sendto()");

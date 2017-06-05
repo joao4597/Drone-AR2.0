@@ -141,7 +141,7 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 		{
 			pthread_mutex_lock(&lock);
 			//printf("Desviox: %lf\nDesvioy: %lf\n",v[0],v[1]);
-			printf("Aquiii*****************************************\n");
+			//printf("Aquiii*****************************************\n");
 			//snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(v[1])),*(int*)(&(v[0])));
 			snprintf(buff,1024,"ET*PCMD=,1,%d,%d,\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)));
 			pthread_mutex_unlock(&lock);
