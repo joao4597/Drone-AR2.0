@@ -1,6 +1,6 @@
 #include "serial_comm.h"
 
-#define READ_USLEEP 100
+#define READ_USLEEP 10000
 
 int fd;
 distance struct_distances;

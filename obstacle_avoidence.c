@@ -4,6 +4,8 @@
 #include <sys/syscall.h>
 #include <assert.h>
 #include <signal.h>
+#include <sys/time.h>
+#include <time.h>
 //#include "cmd.h"
 
 void avoidObstacleHandler();
@@ -12,18 +14,30 @@ void calculateAjustment();
 void calculateTaskTimes();
 void timeBetweenTaskCalls();
 
+ajustments struct_ajustments;
+
 float ajustment_right = 0, ajustment_left = 0, ajustment_front = 0;
 int danger_front = 0, danger_right = 0, danger_left = 0;
 
 distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
-/*void obstacle_avoid(void *obstacle){*/
-int main(){
+void obstacle_avoid(){
 
 	int i;
 	char buff[1024];
-	assert(sizeof(int)==sizeof(float));
+
+
+	struct sched_param sched_param_obstacle;
+	sched_param_obstacle.sched_priority = 1;
+
+
+	//GET THREAD pid_t
+	pid_t x = syscall(__NR_gettid);
+
+
+	//SET THREAD PRIORITY
+	sched_setscheduler(x, SCHED_RR, &sched_param_obstacle);
 
 
 	//OPEN USB0
@@ -45,9 +59,9 @@ int main(){
 	if (sigaction(SIGALRM, &sa, NULL) == -1)
 		perror("sigaction\n");
 	itv.it_value.tv_sec = 0;
-	itv.it_value.tv_usec = 90000;
+	itv.it_value.tv_usec = 60000;
 	itv.it_interval.tv_sec = 0;
-	itv.it_interval.tv_usec = 90000;
+	itv.it_interval.tv_usec = 60000;
 	
 	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
 		perror("setitimer\n");
@@ -95,15 +109,19 @@ void accessDanger(){
 		if(struct_distances.right < D_LOW_LIMIT)
 			danger_right = 1;
 
-	printf("danger_front->%d\ndanger_left->%d\ndanger_right->%d\n\n", danger_front, danger_left, danger_right);
+	//printf("danger_front->%d\ndanger_left->%d\ndanger_right->%d\n\n", danger_front, danger_left, danger_right);
 }
 
 void calculateAjustment(){
+	assert(sizeof(int)==sizeof(float));
+	float ajustment_EW;
 	//cALCULA O AJUSTAMNETO NECESSÁRIO EM CADA UMA DAS DIREÇOES
 	//VALOR CALCULADO É O VALOR A ENVIAR PARA O DRONE
 	if(danger_front == 1){
 		ajustment_front = -((struct_distances.front * slop) + 1);
-	}
+		struct_ajustments.NS = 1;
+	}else
+		struct_ajustments.NS = 0;
 	if(danger_left == 1){
 		ajustment_left = (struct_distances.left * slop) + 1;
 	}
@@ -111,7 +129,24 @@ void calculateAjustment(){
 		ajustment_right = -((struct_distances.right * slop) + 1);
 	}
 
-	printf("NS_ajustment->%f\nEO_ajustement->%f\n\n", ajustment_front, ajustment_right + ajustment_left);
+	if(danger_right == 1 || danger_left == 1)
+		struct_ajustments.EW = 1;
+	else
+		struct_ajustments.EW = 0;
+
+	if(danger_left == danger_right == 1)
+		ajustment_EW = ajustment_left + ajustment_right;
+	else if(danger_left == 1)
+		ajustment_EW = ajustment_left;
+	else
+		ajustment_EW = ajustment_right;
+
+
+	struct_ajustments.NS_ajustment = *((int*)(&(ajustment_front)));
+	struct_ajustments.EW_ajustment = *((int*)(&(ajustment_EW)));
+
+	printf("NS_ajustment->%d\nEW_ajustement->%d\n\n", struct_ajustments.NS_ajustment, struct_ajustments.EW_ajustment);
+	printf("danger_front->%d\ndanger_EW->%d\n\n", struct_ajustments.NS  ,struct_ajustments.EW);
 }
 
 void calculateTaskTimes(){

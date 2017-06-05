@@ -5,6 +5,15 @@
 #define SPEED_AT_DIS_HIGH 0.2
 #define B 1
 
-#include "cmd.h"
+//#include "cmd.h"
 
-void obstacle_avoid(void *obstacle);
+void obstacle_avoid();
+
+typedef struct sensores_ajustment{
+	int NS_ajustment;
+	int EW_ajustment;
+	int NS;
+	int EW;
+}ajustments;
+
+extern ajustments struct_ajustments;
