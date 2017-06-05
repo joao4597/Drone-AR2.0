@@ -107,7 +107,7 @@ void calculateAjustment(){
 	if(danger_left == 1){
 		ajustment_left = (struct_distances.left * slop) + 1;
 	}
-	if(danger_left == 1){
+	if(danger_right == 1){
 		ajustment_right = -((struct_distances.right * slop) + 1);
 	}
 
