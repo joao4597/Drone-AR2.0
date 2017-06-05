@@ -15,12 +15,15 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include "main.h" 
+//#include "image_drone.h" 
 
 #define PORT2 9015
+#define PORT3 9016
 #define PORT1 5556 
 #define MAX_SIZE 1024 
 #define SERVER "192.168.1.1"
+
+float val[2];
 
 
 void die(char *s)
@@ -30,9 +33,17 @@ void die(char *s)
 }
 
 typedef struct {
-	struct sockaddr_in si_other;
-	drone_com shared;
+    pthread_mutex_t *lock;
+    int sock;
+    int *seq;
+}drone_com;
+
+typedef struct {
+    struct sockaddr_in si_other;
+    pthread_mutex_t *lock_pvt;
+    drone_com shared;
 }th_arg;
+
 
 
 int open_connection(int *sock,struct sockaddr_in *si_other,uint32_t port)
@@ -111,10 +122,19 @@ void *cmd_thread_func(void *arg)
 	int slen=sizeof(si_other1);
 	int recv_len;
 	int sock;
+    int i;
+    int xd;
+    int xy;
 	int ret;
 	char buf[MAX_SIZE];
 	char buffer[MAX_SIZE];
+   assert(sizeof(int)==sizeof(float));
+    float x;
+    int j;
+    float y;
 	char *buf_send1;
+    char buf_send2[MAX_SIZE];
+    //assert(sizeof(int)==sizeof(float));
 	//int seq=0;
 
 	//int estado=0;
@@ -125,6 +145,15 @@ void *cmd_thread_func(void *arg)
 	{
 		memset(buf,0,sizeof(buf));
 		memset(buffer,0,sizeof(buffer));
+         pthread_mutex_lock(targ->lock_pvt);
+        x=-1.0*val[0]/600;
+        y=val[1]/600;
+         printf("Valx: %f\nValy: %f\n",x,y);
+         xd=*((int*)(&x));
+         xy=*((int*)(&y));
+
+       //  printf("ValxINT: %d\n",xd);
+          pthread_mutex_unlock(targ->lock_pvt);
 		if ((recv_len = recvfrom(sock,buf,MAX_SIZE,0,NULL,(socklen_t *) &slen)) == -1)
 		{
 			die("recvfrom()");
@@ -132,15 +161,51 @@ void *cmd_thread_func(void *arg)
 		
 		
 		strtok_r (buf, "=", &buf_send1);
-		
 
-		pthread_mutex_lock(targ->shared.lock);
-		snprintf(buffer, 1024, "%s=%u%s\r",buf,*(targ->shared.seq),buf_send1);
-		(*(targ->shared.seq))++;
-		pthread_mutex_unlock(targ->shared.lock);
-		
-		printf("Envio: %s\n",buffer);
+        if(buf[0]=='E')
+        {
+            pthread_mutex_lock(targ->lock_pvt);
+            printf("Valx: %f\nValy: %f\n",val[0],val[1]);
+          
+         //   sleep(1);
+            pthread_mutex_unlock(targ->lock_pvt);
+            printf("Recebdio Antes: %s%s\n",buf,buf_send1);
+            printf("valy: %d\n",xy);
+            snprintf(buf_send2, 1024, "%d,%d",xy,xd);
+          //  snprintf(buf_send2, 1024, "%s,%d\r",buf_send1,xy);
+             //snprintf(buf_send2, 1024, "%s\r",buf_send1);
+            printf("Bsuf2: %s \n",buf_send2);
+            
+            buf[0]='A';
+          //  printf("Recebdio: %s%s%s\n",buf,buf_send1,buf_send2);
+            
+            pthread_mutex_lock(targ->shared.lock);
+           snprintf(buffer, 1024, "%s=%u%s\r",buf,*(targ->shared.seq),buf_send1);
+            (*(targ->shared.seq))++;
+            j=strlen(buffer)-2;
+            pthread_mutex_unlock(targ->shared.lock);
+            printf("Envio: %s\n",buffer);
+            printf("tamanhox: %d\n",strlen(buf_send2));
+            printf("outro tamanh: %d\n",strlen(buffer));
+            printf("ultimo: %c\n",buffer[strlen(buffer)-3]);
+           
+            memcpy(&buffer[j],buf_send2,sizeof(char)*strlen(buf_send2));
+            buffer[j+strlen(buf_send2)]='\r';
+            printf("Envio: %s\n",buffer);
 
+        //    sleep(3);
+            
+        }
+        else
+		{
+
+    		pthread_mutex_lock(targ->shared.lock);
+    		snprintf(buffer, 1024, "%s=%u%s\r",buf,*(targ->shared.seq),buf_send1);
+    		(*(targ->shared.seq))++;
+    		pthread_mutex_unlock(targ->shared.lock);
+    		
+    		printf("Envio: %s\n",buffer);
+        }
 	if (sendto(targ->shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
         die("sendto()");
     }

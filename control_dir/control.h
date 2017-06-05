@@ -47,7 +47,7 @@ void die(char *s)
 
 int abre(int *fd)
 {
-	*fd=open("/dev/input/js0",O_RDONLY);
+	*fd=open("/dev/input/js0",O_RDONLY | O_NONBLOCK);
 	if(*fd>0)
 	{
 		printf("Ficheiro aberto\n");
@@ -76,19 +76,9 @@ int update_axis(axis a[2],struct js_event *ev)
 	   	 	
 	    else
 	    {
-	    	if(ev->value<0)
-	    	{
-	    		a[indice].y = 1.0*(ev->value)/(MAX*0.005);
+			a[indice].y = 1.0*(ev->value)/(MAX*0.1);
 	    	if(indice==1)
 	    		a[indice].y=-1*a[indice].y;
-	    	}
-	    	else
-	    	{
-	    		a[indice].y = 1.0*(ev->value)/(MAX*0.01);
-		    	if(indice==1)
-		    		a[indice].y=-1*a[indice].y;	
-	    	}
-			
 	    }
 		
 		return 1;
@@ -133,7 +123,8 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 	if(type==0)
 	{	//printf("ola\n");
 		//snprintf(buff, 1024, "AT*CONFIG=1,\"control:altitude_max\",\"10000\"");
-		snprintf(buff, 1024, "Ola\n");
+		 snprintf(buff, 1024, "AT*FTRIM=\r");
+		//snprintf(buff, 1024, "Ola\n");
 	}
 	else if(type==1)
 	{
@@ -150,18 +141,22 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 	else if(type==2)
 	{
 		if(search==0)
-			snprintf(buff,1024,"ET*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(analog[1].y)),*(int*)(&(analog[1].x)));
+			snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(analog[1].y)),*(int*)(&(analog[1].x)));
 		else 
 		{
 			pthread_mutex_lock(&lock);
 			//printf("Desviox: %lf\nDesvioy: %lf\n",v[0],v[1]);
 			printf("Aquiii*****************************************\n");
 			//snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(v[1])),*(int*)(&(v[0])));
-			snprintf(buff,1024,"AT*PCMD=,1,%d,%d,\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)));
+			snprintf(buff,1024,"ET*PCMD=,1,%d,%d,\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)));
 			pthread_mutex_unlock(&lock);
 		}
 		
 	}
+	else if(type==3)
+	{
+		snprintf(buff, 1024, "AT*CONFIG=,\"control:altitude_max\",\"10000\"");
+	} 
 	else 
 		return 1;
 	(*seq) ++;

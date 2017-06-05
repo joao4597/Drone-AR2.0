@@ -8,6 +8,6 @@ else
 	PROJECT=video_tutorial_ARM
 endif
 
-PROJ_DIR=/home/rafaz10/git/Drone-AR2.0/
+PROJ_DIR=/home/rafaz10/git/Drone-AR2.0
 # the makefile is useless without the next line!
 include $(DRK_ROOT)/src/projects/projects.mk
