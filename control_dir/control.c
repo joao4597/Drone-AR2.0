@@ -155,8 +155,9 @@ ret=send_cmd(3,ev.number,analog,sock,&seq,si_other,NULL);
 			//printf("Number: %8d\nVal:%d\n",ev.number,ev.value);
 			if(ev.number==10)
 				search=ev.value;
-			else
+			
 			ret=send_cmd(1,ev.number,analog,sock,&seq,si_other,NULL);
+			
 			if(ret==0)
 			{	
 				pthread_mutex_lock(&lock);

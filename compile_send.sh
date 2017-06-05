@@ -1,35 +1,45 @@
-#!/bin/sh
+#DRK_ROOT=/home/rafaz10/teste/dronerk
 
-DRK_ROOT=/home/rafaz10/Desktop/parrot/dronerk
-
-cd $DRK_ROOT/src/libs/drk_api/
-make VERBOSE=y #LOGDATA=y
-
-cd /home/rafaz10/git/Drone-AR2.0/
-make VERBOSE=y #LOGDATA=y
 RED='\033[0;31m'
 BLUE='\033[;34m'
 NC='\033[0m' # No Color
-printf "${BLUE}Project built!${NC}\n"
 
+
+
+#!/bin/sh
+HERE=$(pwd)
 HOST=192.168.1.$1
-FILE0=libdrk_ARM.so
-FILE1=main 
+FILE0='libdrk_ARM.so' 
+#FILE1=$(pwd | awk -F "/" '{print $NF}') #use folder name
+FILE1=video_tutorial
+FILE1=${FILE1}_ARM
 
-cp $DRK_ROOT/lib/$FILE0 .
+# compile drk lib
+godrk
+make VERBOSE=y
+echo " --- " ${FILE0} " done --- "
 
-printf "Sending binary ${RED}$FILE0${NC} and ${RED}$FILE1${NC} to Drone $1..."
+#compile and link this
+cd ${HERE}
+make VERBOSE=y
+echo " --- " ${FILE1} " app done --- "
+
+
+cp ${DRK_ROOT}/lib/${FILE0} .
+#echo id $1 > myid.txt
+#printf "${BLUE}${FILE0} copied to cur folder${NC}\n"
+printf "${BLUE}Sending both...${NC}"
 ftp -n $HOST <<END_SCRIPT
 quote USER 'asd'
 binary
-put $FILE0
-put $FILE1
-
+put ${FILE0}
+put ${FILE1}
 quit
 END_SCRIPT
-rm $FILE0
+printf "${BLUE}Sent!${NC}\n"
+rm ${FILE0}
+#printf "${BLUE}${FILE0} removed from cur folder${NC}\n"
 
-printf "${BLUE}Sent${NC}\n"
 
 printf "${BLUE}Setting executable permissions to both${NC}\n"
 
@@ -41,5 +51,7 @@ rm /data/video/$FILE0
 quit
 END_SCRIPT
 
-printf "${BLUE}Done${NC}\n"
-exit 0
+printf "${BLUE}Installed in the drone${NC}\n"
+
+
+

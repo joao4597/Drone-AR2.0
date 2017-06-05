@@ -230,7 +230,7 @@ while(1)
 //	PRINTF_FL(TABS "Got red red_diff, ret: %d\n",ret);
 	max=get_max(p_red,ret);
 //	printf("Max: %d\n",max);
-	apply_threashold(p_red,ret,(max-10));//coef obtido experimentalmente, alterar para algo mais robusto
+	apply_threashold(p_red,ret,(max-5));//coef obtido experimentalmente, alterar para algo mais robusto
 
 	//printf("Val: %u\n",p_red[2]);
 
@@ -254,7 +254,7 @@ while(1)
        die("sendto()");
     }
  */
-	//usleep(90000);
+	usleep(9000);
    // sleep(1);
 }
 

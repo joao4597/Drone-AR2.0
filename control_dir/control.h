@@ -47,7 +47,7 @@ void die(char *s)
 
 int abre(int *fd)
 {
-	*fd=open("/dev/input/js0",O_RDONLY | O_NONBLOCK);
+	(*fd)=open("/dev/input/js0",O_RDONLY | O_NONBLOCK);
 	if(*fd>0)
 	{
 		printf("Ficheiro aberto\n");
@@ -135,14 +135,9 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 			case 13: snprintf(buff, 1024, "AT*REF=,290717696\r" );
 			break;
 		
-			//printf()
+			
 		}
-	}
-	else if(type==2)
-	{
-		if(search==0)
-			snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(analog[1].y)),*(int*)(&(analog[1].x)));
-		else 
+		if(nr==10)
 		{
 			pthread_mutex_lock(&lock);
 			//printf("Desviox: %lf\nDesvioy: %lf\n",v[0],v[1]);
@@ -151,6 +146,23 @@ int send_cmd(int type,int nr,axis analog[2],int sock,int unsigned *seq,struct so
 			snprintf(buff,1024,"ET*PCMD=,1,%d,%d,\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)));
 			pthread_mutex_unlock(&lock);
 		}
+		else if(nr==15 && search==1)
+		{
+			snprintf(buff,1024,"ET*PCMD=,1,%d,%d,\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)));
+		}
+	}
+	else if(type==2)
+	{
+			snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(analog[1].y)),*(int*)(&(analog[1].x)));
+	/*	else 
+		{
+			pthread_mutex_lock(&lock);
+			//printf("Desviox: %lf\nDesvioy: %lf\n",v[0],v[1]);
+			printf("Aquiii*****************************************\n");
+			//snprintf(buff,1024,"AT*PCMD=,1,%d,%d,%d,%d\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)),*(int*)(&(v[1])),*(int*)(&(v[0])));
+			snprintf(buff,1024,"ET*PCMD=,1,%d,%d,\r",*(int*)(&(analog[0].x)),*(int*)(&(analog[0].y)));
+			pthread_mutex_unlock(&lock);
+		}*/
 		
 	}
 	else if(type==3)

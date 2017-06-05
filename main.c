@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdio.h>
 #include <pthread.h>
-//#include "obstacle_avoidence.c"
+//#include "obstacle_avoidence.h"
 #include "image_drone.h"
+//#include "image_drone.h"
 //#include "cmd.h"
 //#include "main.h"
-
+char send_temp[MAX_SIZE];
 //float val[2];
 pthread_t obstacle_thread;
 
@@ -15,6 +16,7 @@ int main(){
 	pthread_t cmd_thread;
 	pthread_t image_thread;
 	int seq=0;
+	
 	//drone_com obstacle;
 	
 	pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
@@ -50,4 +52,7 @@ int main(){
 	pthread_join(cmd_thread,NULL);
 	//pthread_join(obstacle_thread, NULL);
 	pthread_join(image_thread, NULL);
+
+return 0;
+
 }
