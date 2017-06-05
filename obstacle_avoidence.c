@@ -3,107 +3,153 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <assert.h>
+#include <signal.h>
 //#include "cmd.h"
+
+void avoidObstacleHandler();
+void accessDanger();
+void calculateAjustment();
+void calculateTaskTimes();
+void timeBetweenTaskCalls();
+
+float ajustment_right = 0, ajustment_left = 0, ajustment_front = 0;
+int danger_front = 0, danger_right = 0, danger_left = 0;
 
 distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
-void obstacle_avoid(void *obstacle){
+/*void obstacle_avoid(void *obstacle){*/
+int main(){
 
 	int i;
 	char buff[1024];
-	float ajustment_right, ajustment_left, ajustment_front;
 	assert(sizeof(int)==sizeof(float));
-	//SET THREAD PRIORITY
-	struct sched_param sched_param_obstacle;
-	sched_param_obstacle.sched_priority = 50;
-	th_arg *targ = obstacle;
 
 
 	//OPEN USB0
 	i = serialport_init();
-
-	//GET THREAD pid_t
-	pid_t x = syscall(__NR_gettid);
-
-
-	//SET THREAD PRIORITY
-	sched_setscheduler(x, SCHED_FIFO, &sched_param_obstacle);
 
 	if(i == -1){
 		printf("ERROR OEPNING SERIALPORT\n");
 		exit(0);
 	}
 
+	//CRIA INTERRUPT TEMPORAL E ESTABELECE A FUNÇÃO avoidObstacleHandler
+	//COMO HANDLER DO INTERRUPT
+	struct itimerval itv;
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = avoidObstacleHandler;
 
+	if (sigaction(SIGALRM, &sa, NULL) == -1)
+		perror("sigaction\n");
+	itv.it_value.tv_sec = 0;
+	itv.it_value.tv_usec = 90000;
+	itv.it_interval.tv_sec = 0;
+	itv.it_interval.tv_usec = 90000;
+	
+	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
+		perror("setitimer\n");
+	
+	//SLEEP FOR EVER ATÉ RECEBER SIGKILL
 	while(1){
-
-		serialport_read();
-		printf("front-> %f\nback-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.back, struct_distances.left, struct_distances.right);
-		if(struct_distances.front < D_LOW_LIMIT || struct_distances.left < D_LOW_LIMIT || struct_distances.right < D_LOW_LIMIT){
-
-
-			while(struct_distances.front < D_HIGH_LIMIT || struct_distances.left < D_HIGH_LIMIT || struct_distances.right < D_HIGH_LIMIT){
-
-				if(struct_distances.front < D_HIGH_LIMIT)
-					ajustment_front = -((struct_distances.front * slop) + 1);
-				else
-					ajustment_front = 0;
-
-				//SEND THIS IS THERE IS AN OBSTACLE ON THE LEFT SIDE
-				if(struct_distances.left < D_HIGH_LIMIT){
-					
-					ajustment_left = (struct_distances.left * slop) + 1;
-					printf("move front->%f\nmoveright%f\n\n\n", ajustment_front, ajustment_left);
-					pthread_mutex_lock(targ->shared.lock);
-					snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*(targ->shared.seq),*(int*)(&(ajustment_left)),*(int*)(&(ajustment_front)), 0, 0);
-					(*(targ->shared.seq))++;
-					pthread_mutex_unlock(targ->shared.lock);
-
-
-					if (sendto(targ->shared.sock, buff, strlen(buff) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(targ->si_other))==-1){
-						die("sendto()");
-					}
-					else
-						printf("enviado\n");
-
-					//(*(targ->shared.seq))++;
-
-				//SEND THIS STRING IF THERE IS AN OBJECT ON THE RIGHT SIDE
-				}else if(struct_distances.right < D_HIGH_LIMIT){
-
-					ajustment_right = -((struct_distances.right * slop) + 1);
-					printf("move front->%f\nmoveleft%f\n\n\n", ajustment_front, ajustment_right);
-					pthread_mutex_lock(targ->shared.lock);
-					
-					snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*(targ->shared.seq),*(int*)(&(ajustment_right)),*(int*)(&(ajustment_front)), 0, 0);
-					(*(targ->shared.seq))++;
-					
-					pthread_mutex_unlock(targ->shared.lock);
-
-					if (sendto(targ->shared.sock, buff, strlen(buff) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(targ->si_other))==-1){
-						die("sendto()");
-					}
-					else
-						printf("enviado\n");
-
-				}
-				serialport_read();
-				usleep(1000);
-			}
-			pthread_mutex_lock(targ->shared.lock);
-			snprintf(buff,1024,"AT*PCMD=%u,1,%d,%d,%d,%d\r",*(targ->shared.seq) , 0, 0, 0, 0);
-			(*(targ->shared.seq))++;
-			pthread_mutex_unlock(targ->shared.lock);
-			if (sendto(targ->shared.sock, buff, strlen(buff) , 0 , (struct sockaddr *) &(targ->si_other), sizeof(struct sockaddr_in))==-1){
-				die("sendto()");
-			}
-			else
-				printf("enviado\n");
-			
-		}
-
-		usleep(1000);
-
+		sleep(5000);
 	}
+}
+
+void avoidObstacleHandler(int sig){
+	//CHAMADA PELOS INTERRUPTS TEMPORAIS CRIADOS
+	//CALCULA TEMPO ENTRE CHAMADAS E TEMPO TOTAL
+	//QUE DEMOROU A EXECUÇÃO DA TAREFA
+	timeBetweenTaskCalls();
+	calculateTaskTimes();
+	serialport_read();
+	accessDanger();
+	calculateAjustment();
+	calculateTaskTimes();
+}
+
+void accessDanger(){
+	//VERIFICAR CADA UMA DAS DIREÇOES, DIRECÇOES COM 1 TÊM OBSTACULO
+	//ESTA FUNÇÃO SERVE PARA ASSINALAR PERIGO E PARA LIMPAR CASO O
+	//OBSTACULO DEIXE DE EXISTIR
+	if(danger_front == 1){
+		if(struct_distances.front > D_HIGH_LIMIT)
+			danger_front = 0;
+	}else
+		if(struct_distances.front < D_LOW_LIMIT)
+			danger_front = 1;
+
+	if(danger_left == 1){
+		if(struct_distances.left > D_HIGH_LIMIT)
+			danger_left = 0;
+	}else
+		if(struct_distances.left < D_LOW_LIMIT)
+			danger_left = 1;
+
+	if(danger_right == 1){
+		if(struct_distances.right > D_HIGH_LIMIT)
+			danger_right = 0;
+	}else
+		if(struct_distances.right < D_LOW_LIMIT)
+			danger_right = 1;
+
+	printf("danger_front->%d\ndanger_left->%d\ndanger_right->%d\n\n", danger_front, danger_left, danger_right);
+}
+
+void calculateAjustment(){
+	//cALCULA O AJUSTAMNETO NECESSÁRIO EM CADA UMA DAS DIREÇOES
+	//VALOR CALCULADO É O VALOR A ENVIAR PARA O DRONE
+	if(danger_front == 1){
+		ajustment_front = -((struct_distances.front * slop) + 1);
+	}
+	if(danger_left == 1){
+		ajustment_left = (struct_distances.left * slop) + 1;
+	}
+	if(danger_right == 1){
+		ajustment_right = -((struct_distances.right * slop) + 1);
+	}
+
+	printf("NS_ajustment->%f\nEO_ajustement->%f\n\n", ajustment_front, ajustment_right + ajustment_left);
+}
+
+void calculateTaskTimes(){
+	//MEDE O TEMPO QUE A TAREFA DEMORA A SER CONCLUIDA
+	static int flag = 0;
+	static double start, finish;
+	struct timespec tstart={0,0}, tend={0,0};
+
+	if(flag == 0){
+    	clock_gettime(CLOCK_MONOTONIC, &tstart);
+    	start = ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec);
+    	flag = 1;
+	}else{
+	    clock_gettime(CLOCK_MONOTONIC, &tend);
+	    finish = ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec);
+
+	    printf("Task took about %.9f seconds\n", finish - start);
+	    flag = 0;
+	}
+}
+
+void timeBetweenTaskCalls(){
+	//MEDE O TEMPO ENTRE CHAMADAS Á TAREFA
+	static int flag = 0;
+	static double start, finish;
+	struct timespec tstart={0,0}, tend={0,0};
+
+	if(flag == 0){
+    	clock_gettime(CLOCK_MONOTONIC, &tstart);
+    	start = ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec);
+    	flag = 1;
+	}else{
+	    clock_gettime(CLOCK_MONOTONIC, &tend);
+	    finish = ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec);
+
+	    printf("time between task calls %.9f seconds\n\n", finish - start);
+
+	    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    	start = ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec);
+	}	
 }

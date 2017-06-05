@@ -84,7 +84,7 @@ int serialport_read(){
         }else if(c == 'S'){
 
             //Read distance front sensor
-            for(i = 0; i<1; i++){
+            for(i = 0; i<9; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
@@ -92,17 +92,8 @@ int serialport_read(){
                     break;
                 }
             }
-            //Read distance Back sensor
-            /*for(i = 0; 1; i++){
-                buffer[i] = serialport_read_char();
-                if(buffer[i] == '\n'){
-                    buffer[i] = '\0';
-                    struct_distances.back = (float)atof(buffer);
-                    break;
-                }
-            }*/
             //Read distane left sensor
-            for(i = 0; i<1; i++){
+            for(i = 0; i<9; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
@@ -111,7 +102,7 @@ int serialport_read(){
                 }
             }
             //Read distance right sensor
-            for(i = 0; i<1; i++){
+            for(i = 0; i<9; i++){
                 buffer[i] = serialport_read_char();
                 if(buffer[i] == '\n'){
                     buffer[i] = '\0';
@@ -120,7 +111,7 @@ int serialport_read(){
                 }
             }
 
-            //printf("front-> %f\nback-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.back, struct_distances.left, struct_distances.right);
+            printf("front-> %f\nleft-> %f\nright-> %f\n\n\n", struct_distances.front, struct_distances.left, struct_distances.right);
             break;
         }
     }while(1);
