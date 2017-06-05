@@ -4,13 +4,9 @@
 #include <sys/syscall.h>
 #include <assert.h>
 #include <signal.h>
-<<<<<<< HEAD:tmp/obstacle_avoidence.c
-//#include "image_drone.h"
-=======
 #include <sys/time.h>
 #include <time.h>
 //#include "cmd.h"
->>>>>>> c11a598d7c3f81947ff695f51a2b4f22a1667de9:obstacle_avoidence.c
 
 void avoidObstacleHandler();
 void accessDanger();
@@ -26,12 +22,7 @@ int danger_front = 0, danger_right = 0, danger_left = 0;
 distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
-<<<<<<< HEAD:tmp/obstacle_avoidence.c
-void obstacle_avoid(void *obstacle){
-
-=======
 void obstacle_avoid(){
->>>>>>> c11a598d7c3f81947ff695f51a2b4f22a1667de9:obstacle_avoidence.c
 
 	int i;
 	char buff[1024];
