@@ -1,8 +1,8 @@
-#define D_HIGH_LIMIT 1.10
-#define D_LOW_LIMIT 0.80
+#define D_HIGH_LIMIT 1.30
+#define D_LOW_LIMIT 1.0
 
-#define SPEED_AT_DIS_LOW 0.8
-#define SPEED_AT_DIS_HIGH 0.2
+#define SPEED_AT_DIS_LOW 0.6
+#define SPEED_AT_DIS_HIGH 0.1
 #define B 1
 
 //#include "cmd.h"
@@ -20,3 +20,5 @@ typedef struct sensores_ajustment{
 }ajustments;
 
 extern ajustments struct_ajustments;
+extern int hoover;
+extern int obstacle_flag;

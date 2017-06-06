@@ -200,7 +200,7 @@ void *cmd_thread_func(void *arg)
         if(time_lapsed>max && time_lapsed<0.5)
             max=time_lapsed;
 
-        printf("Time lapsed: %lf\tMax: %lf\n",time_lapsed,max);
+        //printf("Time lapsed: %lf\tMax: %lf\n",time_lapsed,max);
         }
 
 }

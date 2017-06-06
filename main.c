@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdio.h>
 #include <pthread.h>
-//#include "obstacle_avoidence.h"
+#include "obstacle_avoidence.h"
 #include "image_drone.h"
 #include <sys/types.h>
 #include <sys/syscall.h>
@@ -14,11 +14,12 @@
 //#include "main.h"
 char send_temp[MAX_SIZE];
 int cmd_flag;
+int obstacle_flag;
 char cmd_prefix[MAX_SIZE];
 //float val[2];
 //pthread_t obstacle_thread;
 
-
+int hoover;
 
 //ajustments struct_ajustments;
 
@@ -30,9 +31,9 @@ int main(){
 	pthread_t cmd_thread;
 	pthread_t image_thread;
 	pthread_t obstacle_thread;
-
+	hoover=0;
 	int seq=0;
-	
+	int obstacle_flag=0;
 	//drone_com obstacle;
 	char buffer[MAX_SIZE];
 	
@@ -55,7 +56,7 @@ int main(){
 	n=pthread_create(&cmd_thread,NULL,cmd_thread_func,(void*)&targ);
 	//n=pthread_create(&obstacle_thread,NULL,obstacle_avoid,NULL);
 	//n=pthread_create(&image_thread,NULL,image_drone_func,(void*)&targ);
-/*
+
 	pthread_t thread_obstacle;
 
     pthread_attr_t act_attr;
@@ -67,7 +68,7 @@ int main(){
     if (pthread_create(&thread_obstacle, &act_attr, obstacle_avoid ,NULL) != 0){
         printf( "spawning thread: - Error - %d\n", strerror(errno));
         return -1 ;
-    }*/
+    }
 
 
 	//struct_ajustments.NS=0;
@@ -75,17 +76,24 @@ int main(){
 	while(1)
 	{
 
-		sleep(100);
+		//sleep(100);
 		//obstacle_avoid();
 		//CREAT OBSTACLE AVOIDENCE THREAD
 	//	printf("hello\n");
 	//	avoidObstacleHandler(0);
-/*
+
 		memset(buffer,0,MAX_SIZE);
-		if(struct_ajustments.NS || struct_ajustments.EW)
+		if(hoover==1)
+		{
+			hoover=0;
+			snprintf(buffer,1024,"AT*PCMD=%u,0,0,0,0\r",seq);
+			seq++;
+
+		}
+		else if(struct_ajustments.NS || struct_ajustments.EW)
 		{
 			
-			snprintf(buffer,1024,"AT*PCMD=%u,%d,%d,0,0\r",seq,struct_ajustments.EW_ajustment,struct_ajustments.NS_ajustment);
+			snprintf(buffer,1024,"AT*PCMD=%u,0,%d,0,0\r",seq,struct_ajustments.NS_ajustment);
 			seq++;
 		}
 		else
@@ -96,9 +104,9 @@ int main(){
 		}
 
 
-		if(cmd_flag==1 || struct_ajustments.NS || struct_ajustments.EW)
+		if(cmd_flag==1 || obstacle_flag==1)
 		{
-			
+			obstacle_flag=0;
 
 			if (sendto(targ.shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ.si_other), sizeof(struct sockaddr_in))==-1){
 		        die("sendto()");
@@ -111,7 +119,7 @@ int main(){
 			//pthread_mutex_unlock(&lock);
 		}	
 		usleep(40000);
-	//	sleep(100);*/
+	//	sleep(100);
 
 	}
 

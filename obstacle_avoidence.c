@@ -14,6 +14,8 @@ void calculateAjustment();
 void calculateTaskTimes();
 void timeBetweenTaskCalls();
 
+int hoover;
+
 ajustments struct_ajustments;
 
 float ajustment_right = 0, ajustment_left = 0, ajustment_front = 0;
@@ -42,7 +44,7 @@ void *obstacle_avoid(void *atr){
 	while(1){
 		//printf("ciclo\n");
 		avoidObstacleHandler(0);
-		usleep(50000);
+		usleep(70000);
 	}
 
 }
@@ -53,8 +55,10 @@ void avoidObstacleHandler(int sig){
 	//QUE DEMOROU A EXECUÇÃO DA TAREFA
 	timeBetweenTaskCalls();
 	calculateTaskTimes();
+	
 	serialport_read();
 	accessDanger();
+	
 	calculateAjustment();
 	calculateTaskTimes();
 }
@@ -64,13 +68,17 @@ void accessDanger(){
 	//ESTA FUNÇÃO SERVE PARA ASSINALAR PERIGO E PARA LIMPAR CASO O
 	//OBSTACULO DEIXE DE EXISTIR
 	if(danger_front == 1){
-		if(struct_distances.front > D_HIGH_LIMIT)
+		if(struct_distances.front > D_HIGH_LIMIT){
+				hoover=1;
+
 			danger_front = 0;
+			
+		}
 	}else
 		if(struct_distances.front < D_LOW_LIMIT)
 			danger_front = 1;
 
-	if(danger_left == 1){
+	/*if(danger_left == 1){
 		if(struct_distances.left > D_HIGH_LIMIT)
 			danger_left = 0;
 	}else
@@ -82,7 +90,7 @@ void accessDanger(){
 			danger_right = 0;
 	}else
 		if(struct_distances.right < D_LOW_LIMIT)
-			danger_right = 1;
+			danger_right = 1;*/
 
 	//printf("danger_front->%d\ndanger_left->%d\ndanger_right->%d\n\n", danger_front, danger_left, danger_right);
 }
@@ -94,10 +102,17 @@ void calculateAjustment(){
 	//VALOR CALCULADO É O VALOR A ENVIAR PARA O DRONE
 	if(danger_front == 1){
 		ajustment_front = -((struct_distances.front * slop) + 1);
+		if(ajustment_front > - 0.1)
+			ajustment_front = -0.1;
+		else if(ajustment_front < -0.9)
+			ajustment_front = -0.9;
 		struct_ajustments.NS = 1;
-	}else
+	}else{
 		struct_ajustments.NS = 0;
-	if(danger_left == 1){
+		ajustment_front=0;
+	}
+	obstacle_flag=1;
+	/*if(danger_left == 1){
 		ajustment_left = (struct_distances.left * slop) + 1;
 	}
 	if(danger_right == 1){
@@ -114,15 +129,15 @@ void calculateAjustment(){
 	else if(danger_left == 1)
 		ajustment_EW = ajustment_left;
 	else
-		ajustment_EW = ajustment_right;
+		ajustment_EW = ajustment_right;*/
 
-
+	printf("adjustment_front: %f\n",ajustment_front);
 	struct_ajustments.NS_ajustment = *((int*)(&(ajustment_front)));
-	struct_ajustments.EW_ajustment = *((int*)(&(ajustment_EW)));
+	//struct_ajustments.EW_ajustment = *((int*)(&(ajustment_EW)));
 
 	//printf("NS_ajustment->%d\nEW_ajustement->%d\n\n", struct_ajustments.NS_ajustment, struct_ajustments.EW_ajustment);
-	printf("danger_front->%d\ndanger_EW->%d\n", struct_ajustments.NS  ,struct_ajustments.EW);
-	printf("danger_front->%f\ndanger_EW->%f\n\n", ajustment_front  ,ajustment_EW);
+	//printf("danger_front->%d\ndanger_EW->%d\n", struct_ajustments.NS  ,struct_ajustments.EW);
+	//printf("danger_front->%f\ndanger_EW->%f\n\n", ajustment_front  ,ajustment_EW);
 }
 
 void calculateTaskTimes(){
@@ -139,7 +154,7 @@ void calculateTaskTimes(){
 	    clock_gettime(CLOCK_MONOTONIC, &tend);
 	    finish = ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec);
 
-	    //printf("Task took about %.9f seconds\n", finish - start);
+	   // printf("Task took about %.9f seconds\n", finish - start);
 	    flag = 0;
 	}
 }
