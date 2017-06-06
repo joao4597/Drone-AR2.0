@@ -7,7 +7,8 @@
 
 //#include "cmd.h"
 
-void *obstacle_avoid(void *arg);
+void *obstacle_avoid(void *atr);
+void avoidObstacleHandler(int sig);
 
 typedef struct sensores_ajustment{
 	int NS_ajustment;
