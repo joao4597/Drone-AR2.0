@@ -53,35 +53,18 @@ int main(){
 	//n=pthread_create(&obstacle_thread,NULL,obstacle_avoid,NULL);
 	//n=pthread_create(&image_thread,NULL,image_drone_func,(void*)&targ);
 
+	pthread_t thread_obstacle;
 
+    pthread_attr_t act_attr;
+    pthread_attr_init(&act_attr);
+    size_t act_desired_stack_size = 4000000;
+    pthread_attr_setstacksize(&act_attr, act_desired_stack_size);
+    
 
-
-
-
-	/*obstacle_avoid();
-
-	//CRIA INTERRUPT TEMPORAL E ESTABELECE A FUNÇÃO avoidObstacleHandler
-	//COMO HANDLER DO INTERRUPT
-	struct itimerval itv;
-	struct sigaction sa;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = avoidObstacleHandler;
-
-	if (sigaction(SIGALRM, &sa, NULL) == -1)
-		perror("sigaction\n");
-	itv.it_value.tv_sec = 0;
-	itv.it_value.tv_usec = 60000;
-	itv.it_interval.tv_sec = 0;
-	itv.it_interval.tv_usec = 60000;
-	
-	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
-		perror("setitimer\n");
-
-
-
-
-*/
+    if (pthread_create(&thread_obstacle, &act_attr, obstacle_avoid ,NULL) != 0){
+        printf( "spawning thread: - Error - %d\n", strerror(errno));
+        return -1 ;
+    }
 
 
 
@@ -105,7 +88,7 @@ int main(){
 		}
 
 
-		if(cmd_flag==1)
+		if(cmd_flag==1 || struct_ajustments.NS || struct_ajustments.EW)
 		{
 			
 			if (sendto(targ.shared.sock,buffer, strlen(buffer) , 0 , (struct sockaddr *) &(targ.si_other), sizeof(struct sockaddr_in))==-1){
@@ -129,6 +112,8 @@ int main(){
 		printf("COULDN'T CREAT THREAD\n");
 		return -1;
 	}
+
+	pthread_join(thread_obstacle, NULL);
 
 	//WAIT ON THREADS
 	//pthread_join(cmd_thread,NULL);
