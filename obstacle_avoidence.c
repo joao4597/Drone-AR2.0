@@ -22,12 +22,12 @@ int danger_front = 0, danger_right = 0, danger_left = 0;
 distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
-void *obstacle_avoid(void *arg){
+void obstacle_avoid(){
 
 	int i;
 	char buff[1024];
 
-
+/*
 	struct sched_param sched_param_obstacle;
 	sched_param_obstacle.sched_priority = 1;
 
@@ -38,7 +38,7 @@ void *obstacle_avoid(void *arg){
 
 	//SET THREAD PRIORITY
 	sched_setscheduler(x, SCHED_RR, &sched_param_obstacle);
-
+*/
 
 	//OPEN USB0
 	i = serialport_init();
@@ -47,7 +47,7 @@ void *obstacle_avoid(void *arg){
 		printf("ERROR OEPNING SERIALPORT\n");
 		exit(0);
 	}
-
+/*
 	//CRIA INTERRUPT TEMPORAL E ESTABELECE A FUNÇÃO avoidObstacleHandler
 	//COMO HANDLER DO INTERRUPT
 	struct itimerval itv;
@@ -69,7 +69,7 @@ void *obstacle_avoid(void *arg){
 	//SLEEP FOR EVER ATÉ RECEBER SIGKILL
 	while(1){
 		sleep(5000);
-	}
+	}*/
 }
 
 void avoidObstacleHandler(int sig){

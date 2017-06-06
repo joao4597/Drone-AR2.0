@@ -17,3 +17,6 @@ typedef struct sensores_ajustment{
 }ajustments;
 
 extern ajustments struct_ajustments;
+
+void obstacle_avoid();
+void avoidObstacleHandler(int sig);

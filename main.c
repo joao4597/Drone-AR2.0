@@ -41,8 +41,38 @@ int main(){
 	
 	//obstacle.sock=targ.shared.sock;
 	//n=pthread_create(&cmd_thread,NULL,cmd_thread_func,(void*)&targ);
-	n=pthread_create(&obstacle_thread,NULL,obstacle_avoid,NULL);
+	//n=pthread_create(&obstacle_thread,NULL,obstacle_avoid,NULL);
 	//n=pthread_create(&image_thread,NULL,image_drone_func,(void*)&targ);
+
+
+
+
+
+
+	obstacle_avoid();
+
+	//CRIA INTERRUPT TEMPORAL E ESTABELECE A FUNÇÃO avoidObstacleHandler
+	//COMO HANDLER DO INTERRUPT
+	struct itimerval itv;
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = avoidObstacleHandler;
+
+	if (sigaction(SIGALRM, &sa, NULL) == -1)
+		perror("sigaction\n");
+	itv.it_value.tv_sec = 0;
+	itv.it_value.tv_usec = 60000;
+	itv.it_interval.tv_sec = 0;
+	itv.it_interval.tv_usec = 60000;
+	
+	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
+		perror("setitimer\n");
+
+
+
+
+
 
 
 
@@ -83,7 +113,7 @@ int main(){
 
 	//WAIT ON THREADS
 	//pthread_join(cmd_thread,NULL);
-	pthread_join(obstacle_thread, NULL);
+	//pthread_join(obstacle_thread, NULL);
 	//pthread_join(image_thread, NULL);
 
 return 0;
