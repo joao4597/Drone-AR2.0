@@ -69,7 +69,7 @@ int main(){
 	    else
 	    	printf("enviado\n");
 
-		usleep(400000);
+		usleep(40000);
 	//	sleep(100);
 
 	}
