@@ -22,6 +22,7 @@
 #define PORT1 5556 
 #define MAX_SIZE 1024 
 #define SERVER "192.168.1.1"
+#define BILLION 1E9
 
 float val[2];
 extern int cmd_flag;
@@ -119,8 +120,6 @@ int open_server_socket(int *sock,struct sockaddr_in *si_other,struct sockaddr_in
 
 void *cmd_thread_func(void *arg)
 {
-	
-	//int *dr_sock=arg;
 	struct sockaddr_in si_other1;
 	th_arg *targ=arg;
 	struct sockaddr_in si_me;
@@ -133,41 +132,34 @@ void *cmd_thread_func(void *arg)
 	int ret;
 	char buf[MAX_SIZE];
 	char buffer[MAX_SIZE];
-   assert(sizeof(int)==sizeof(float));
+    assert(sizeof(int)==sizeof(float));
     float x;
     int j;
     int size;
     float y;
 	char *buf_send1;
     char buf_send2[MAX_SIZE];
-    //assert(sizeof(int)==sizeof(float));
-	//int seq=0;
-
-	//int estado=0;
-
-    //printf("ola\n");
 	ret=open_server_socket(&sock,&si_other1,&si_me,PORT2);
-   // printf("ola2\n");
-	//int slen=sizeof(si_me);
+    struct timespec requestStart, requestEnd;
+    double time_lapsed;
+    double max=0;
+    
+    
+
 	while(1)
 	{
+        clock_gettime(CLOCK_REALTIME, &requestStart);
 		memset(buf,0,sizeof(buf));
 		memset(buffer,0,sizeof(buffer));
-        //pthread_mutex_lock(targ->lock_pvt);
         x=-1.0*val[0]/800;
         y=val[1]/800;
-       // printf("Valx: %f\nValy: %f\n",x,y);
         xd=*((int*)(&x));
         xy=*((int*)(&y));
-
-       //  printf("ValxINT: %d\n",xd);
-        //  pthread_mutex_unlock(targ->lock_pvt);
 		if ((recv_len = recvfrom(sock,buf,MAX_SIZE,0,NULL,(socklen_t *) &slen)) == -1)
 		{
 			die("recvfrom()");
 		}
 		memset(send_temp,0,MAX_SIZE);
-        printf("buf:%s\n",buf);
         size=strlen(buf);
         for(i=0;i<size;i++)
         {
@@ -175,65 +167,40 @@ void *cmd_thread_func(void *arg)
             {
                 memcpy(buffer,&buf[i+1],size-i-1);
                 size=size-i-1;
-                printf("Buffer: %s\n",buffer);
                 break;
             }
         }
         strtok_r (buf, "=", &buf_send1);
-        printf("buf_send1: %s\n",buf_send1);
         if(buf[0]=='E')
         {
             pthread_mutex_lock(targ->lock_pvt);
-        //    printf("Valx: %f\nValy: %f\n",val[0],val[1]);
-            
-         //   sleep(1);
             pthread_mutex_unlock(targ->lock_pvt);
-       //     printf("Recebdio Antes: %s%s\n",buf,buf_send1);
-         //   printf("valy: %d\n",xy);
-           // snprintf(buf_send2, 1024, "%d,%d",xy,xd);
             snprintf(buf_send2, 1024, "0,%d",xd);
-          //  snprintf(buf_send2, 1024, "%s,%d\r",buf_send1,xy);
-             //snprintf(buf_send2, 1024, "%s\r",buf_send1);
-           // printf("Bsuf2: %s \n",buf_send2);
             
             buf[0]='A';
-          //  printf("Recebdio: %s%s%s\n",buf,buf_send1,buf_send2);
-            pthread_mutex_lock(targ->shared.lock);
-           snprintf(buffer, 1024, "%s=%u%s\r",buf,*(targ->shared.seq),buf_send1);
-          //  (*(targ->shared.seq))++;
+            snprintf(buffer, 1024, "%s=%u%s\r",buf,*(targ->shared.seq),buf_send1);
             j=strlen(buffer)-2;
-            pthread_mutex_unlock(targ->shared.lock);
-            //printf("Envio: %s\n",buffer);
-         //   printf("tamanhox: %d\n",strlen(buf_send2));
-           // printf("outro tamanh: %d\n",strlen(buffer));
-            //printf("ultimo: %c\n",buffer[strlen(buffer)-3]);
-           
+
             memcpy(&buffer[j],buf_send2,sizeof(char)*strlen(buf_send2));
             buffer[j+strlen(buf_send2)]='\r';
-
-            //printf("Envio: %s\n",buffer);
-           // sleep(1);
-        //    sleep(3);
-            
         }
      
 
       
         pthread_mutex_lock(targ->shared.lock);
-      //  printf("lock1\n");
         cmd_flag=1;
         memset(cmd_prefix,0,MAX_SIZE);
         memset(send_temp,0,MAX_SIZE);
-        printf("buf_short: %s\n",buf);
         memcpy(cmd_prefix,buf,strlen(buf));
-        printf("tamanho buffer: %d\n",size);
         for(i=0;i<size;i++)
             send_temp[i]=buffer[i];
-        printf("Send_temp: %s\n",send_temp);
         pthread_mutex_unlock(targ->shared.lock);
-       // printf("ola3\n");
+        clock_gettime(CLOCK_REALTIME, &requestEnd);
+        time_lapsed = ( requestEnd.tv_sec - requestStart.tv_sec )+( requestEnd.tv_nsec - requestStart.tv_nsec )/ BILLION;
+        if(time_lapsed>max && time_lapsed<0.5)
+            max=time_lapsed;
 
-
+        printf("Time lapsed: %lf\tMax: %lf\n",time_lapsed,max);
         }
 
 }

@@ -1,4 +1,4 @@
-#DRK_ROOT=/home/rafaz10/teste/dronerk
+DRK_ROOT=/home/joao/Documents/dronerk-master-59b5de053886b088f84c6177b3f04be0a9e63812
 
 RED='\033[0;31m'
 BLUE='\033[;34m'

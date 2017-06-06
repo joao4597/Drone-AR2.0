@@ -5,4 +5,6 @@ mv /tmp/udev/dev/ttyUSB0 /tmp/udev/dev/ttyOUTRO
 insmod v4l2loopback.ko
 mv /dev/video1 /dev/videoC
 mv /dev/video7 /dev/video1
+#/bin/program.elf.respawner.sh &
+/bin/program.elf.sh &
 /bin/program.elf.respawner.sh &

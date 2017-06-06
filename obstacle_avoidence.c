@@ -28,6 +28,8 @@ void *obstacle_avoid(void *atr){
 	int i;
 	char buff[1024];
 
+	printf("primeiro\n");
+
 
 	//OPEN USB0
 	i = serialport_init();
@@ -36,27 +38,9 @@ void *obstacle_avoid(void *atr){
 		printf("ERROR OEPNING SERIALPORT\n");
 		exit(0);
 	}
-/*
-	//CRIA INTERRUPT TEMPORAL E ESTABELECE A FUNÇÃO avoidObstacleHandler
-	//COMO HANDLER DO INTERRUPT
-	struct itimerval itv;
-	struct sigaction sa;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = avoidObstacleHandler;
 
-	if (sigaction(SIGALRM, &sa, NULL) == -1)
-		perror("sigaction\n");
-	itv.it_value.tv_sec = 0;
-	itv.it_value.tv_usec = 60000;
-	itv.it_interval.tv_sec = 0;
-	itv.it_interval.tv_usec = 60000;
-	
-	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
-		perror("setitimer\n");
-*/
-	//SLEEP FOR EVER ATÉ RECEBER SIGKILL
 	while(1){
+		//printf("ciclo\n");
 		avoidObstacleHandler(0);
 		usleep(50000);
 	}
@@ -136,8 +120,9 @@ void calculateAjustment(){
 	struct_ajustments.NS_ajustment = *((int*)(&(ajustment_front)));
 	struct_ajustments.EW_ajustment = *((int*)(&(ajustment_EW)));
 
-	printf("NS_ajustment->%d\nEW_ajustement->%d\n\n", struct_ajustments.NS_ajustment, struct_ajustments.EW_ajustment);
-	printf("danger_front->%d\ndanger_EW->%d\n\n", struct_ajustments.NS  ,struct_ajustments.EW);
+	//printf("NS_ajustment->%d\nEW_ajustement->%d\n\n", struct_ajustments.NS_ajustment, struct_ajustments.EW_ajustment);
+	printf("danger_front->%d\ndanger_EW->%d\n", struct_ajustments.NS  ,struct_ajustments.EW);
+	printf("danger_front->%f\ndanger_EW->%f\n\n", ajustment_front  ,ajustment_EW);
 }
 
 void calculateTaskTimes(){
@@ -154,7 +139,7 @@ void calculateTaskTimes(){
 	    clock_gettime(CLOCK_MONOTONIC, &tend);
 	    finish = ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec);
 
-	    printf("Task took about %.9f seconds\n", finish - start);
+	    //printf("Task took about %.9f seconds\n", finish - start);
 	    flag = 0;
 	}
 }
@@ -173,7 +158,7 @@ void timeBetweenTaskCalls(){
 	    clock_gettime(CLOCK_MONOTONIC, &tend);
 	    finish = ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec);
 
-	    printf("time between task calls %.9f seconds\n\n", finish - start);
+	    //printf("time between task calls %.9f seconds\n\n", finish - start);
 
 	    clock_gettime(CLOCK_MONOTONIC, &tstart);
     	start = ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec);

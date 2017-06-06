@@ -47,7 +47,7 @@ void die(char *s)
 
 int abre(int *fd)
 {
-	(*fd)=open("/dev/input/js0",O_RDONLY | O_NONBLOCK);
+	(*fd)=open("/dev/input/js0",O_RDONLY);
 	if(*fd>0)
 	{
 		printf("Ficheiro aberto\n");
