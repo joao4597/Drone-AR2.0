@@ -22,7 +22,8 @@ int danger_front = 0, danger_right = 0, danger_left = 0;
 distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
-int main(){
+
+void *obstacle_avoid(void *atr){
 
 	int i;
 	char buff[1024];
@@ -35,7 +36,7 @@ int main(){
 		printf("ERROR OEPNING SERIALPORT\n");
 		exit(0);
 	}
-
+/*
 	//CRIA INTERRUPT TEMPORAL E ESTABELECE A FUNÇÃO avoidObstacleHandler
 	//COMO HANDLER DO INTERRUPT
 	struct itimerval itv;
@@ -53,11 +54,13 @@ int main(){
 	
 	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
 		perror("setitimer\n");
-	
+*/
 	//SLEEP FOR EVER ATÉ RECEBER SIGKILL
 	while(1){
-		sleep(5000);
+		avoidObstacleHandler(0);
+		usleep(50000);
 	}
+
 }
 
 void avoidObstacleHandler(int sig){

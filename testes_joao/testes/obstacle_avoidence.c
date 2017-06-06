@@ -23,7 +23,7 @@ distance struct_distances;
 float slop = (SPEED_AT_DIS_HIGH - SPEED_AT_DIS_LOW) / (D_HIGH_LIMIT - D_LOW_LIMIT);
 
 
-void *obstacle_avoid(void *atr){
+void obstacle_avoid(){
 
 	int i;
 	char buff[1024];
@@ -54,13 +54,13 @@ void *obstacle_avoid(void *atr){
 	
 	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
 		perror("setitimer\n");
-*/
+/*
+/*	
 	//SLEEP FOR EVER ATÉ RECEBER SIGKILL
 	while(1){
-		avoidObstacleHandler(0);
-		usleep(50000);
+		sleep(5000);
 	}
-
+*/
 }
 
 void avoidObstacleHandler(int sig){
